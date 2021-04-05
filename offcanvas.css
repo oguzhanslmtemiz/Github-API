@@ -74,8 +74,8 @@ body {
   fill: currentColor;
 }
 
-#search-group{
-  
+#search-group {
+
   max-width: 50%;
 
 }
@@ -94,4 +94,27 @@ body {
   #search-group {
     max-width: none;
   }
+}
+
+.hover {
+  text-decoration: none;
+
+}
+
+.hover:hover {
+  cursor: pointer;
+  background-color: #eee;
+}
+
+.page-item .page-link {
+  user-select: none;
+  cursor: pointer;
+}
+
+.page-item.active .page-link {
+  pointer-events: none;
+}
+
+.page-link:focus {
+  box-shadow: none;
 }
