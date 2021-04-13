@@ -1,6 +1,7 @@
 class Github {
     constructor() {
-        this.url = `https://api.github.com/search/`
+        this.searchUrl = `https://api.github.com/search/`
+        this.userUrl = `https://api.github.com/users/`
     }
 
     filter(items) {
@@ -10,7 +11,8 @@ class Github {
                 user: {
                     login: element.login,
                     html_url: element.html_url,
-                    avatar_url: element.avatar_url
+                    avatar_url: element.avatar_url,
+                    url: element.url
                 },
                 repository: {
                     created_at: element.created_at,
@@ -43,14 +45,14 @@ class Github {
         return arr
     }
 
-    async getData(type, input) {
-        let response = await fetch(this.url + `${type}?q=${input}`)
+    async getSearchData(type, input) {
+        let response = await fetch(this.searchUrl + `${type}?q=${input}`)
         let json = await response.json()
-        console.log(this.url + `${type}?q=${input}`)
+        console.log(this.searchUrl + `${type}?q=${input}`)
         console.log("fetch: ", json)
         return {
             transmitted: {
-                url: this.url + `${type}?q=${input}`,
+                url: this.searchUrl + `${type}?q=${input}`,
                 type: type,
                 input: input
             },
@@ -68,5 +70,13 @@ class Github {
             total_count: json.total_count,
             items: this.filter(json.items)
         }
+    }
+
+    async getUserData(username) {
+        let response = await fetch(this.userUrl + username)
+        let json = await response.json()
+        console.log("getUserData: ", this.userUrl + username)
+        console.log("fetch: ", json)
+        return json
     }
 }

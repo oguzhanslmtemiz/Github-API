@@ -72,6 +72,7 @@ body {
 /* ----------- */
 .svg {
   fill: currentColor;
+  vertical-align: text-bottom;
 }
 
 #search-group {
@@ -117,4 +118,12 @@ body {
 
 .page-link:focus {
   box-shadow: none;
+}
+
+.list-style-none {
+  list-style: none;
+}
+
+.mw-500 {
+  max-width: 30rem;
 }
