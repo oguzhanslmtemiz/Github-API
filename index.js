@@ -21,6 +21,7 @@ function search() {
     UI.hideResults()
     document.getElementById("searchResultsDiv").innerHTML = ""
     UI.addSearchResultsElement()
+    UI.searchLoader()
     let ui = new UI()
     if (searchInput.value.trim() !== "" && searchSelect.innerText === "Users ") {
         github.getSearchData(searchSelect.innerText.trim().toLowerCase(), searchInput.value.trim())
@@ -47,19 +48,38 @@ function search() {
 }
 
 function changePage(url, page) {
+    UI.searchLoader()
     let ui = new UI()
     github.getPageData(url, page)
         .then(response => ui.changeResults(response)) //sadece users
 }
 
 function showUser(username) {
-    document.getElementById("searchResultsDiv").innerHTML = ""
+    console.log("searchResultsDiv temizlendi");
     UI.showResults()
     let ui = new UI()
-    console.log(username);
+
+    ui.overview.setAttribute("style", "display:none !important")
+    ui.ph_overview.setAttribute("style", "display:block !important")
+    UI.repoLoader()
+
+    console.log("username: ", username);
     github.getUserData(username)
         .then(response => {
+            console.log("2. asama");
             ui.showUser(response)
+            github.getUserRepo(response.repos_url)
+                .then(responseRepo => {
+                    console.log("3. asama");
+                    ui.showRepos(responseRepo)
+                })
             console.log("nebunebu", response)
-        })
+        }).then(function () {
+                console.log("Stage 4");
+                ui.ph_overview.setAttribute("style", "display:none !important")
+                ui.overview.setAttribute("style", "display:flex !important")
+            }
+
+        )
+
 }

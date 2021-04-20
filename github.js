@@ -79,4 +79,12 @@ class Github {
         console.log("fetch: ", json)
         return json
     }
+
+    async getUserRepo(url) {
+        let response = await fetch(url + "?sort=updated")
+        let json = await response.json()
+        console.log("repo fetch: ",json);
+        return json
+
+    }
 }

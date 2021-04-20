@@ -4,6 +4,12 @@ class UI {
         this.paginationElement = document.getElementById("pagination")
         this.paginationItem = document.getElementById("pagination-item")
         this.searchResults = document.getElementById("search-results")
+
+        this.overview = document.getElementById("overview")
+        this.ph_overview = document.getElementById("ph-overview")
+
+        this.recentRepos = document.getElementById("recent-repos")
+
     }
 
     static addBoxShadow() {
@@ -61,12 +67,14 @@ class UI {
     }
 
     static showResults() {
+        window.scrollTo(0, 0)
+        document.getElementById("searchResultsDiv").innerHTML = ""
         userResultsDiv.setAttribute("style", "")
         navigation.setAttribute("style", "")
     }
 
     showUser(response) {
-        let overview = document.getElementById("overview")
+
         let user_following = document.getElementById("user-following")
         let user_followers = document.getElementById("user-followers")
         let user_repos = document.getElementById("user-public_repos")
@@ -80,6 +88,8 @@ class UI {
         let user_location = document.getElementById("user-location")
         let user_blog = document.getElementById("user-blog")
         let user_twitter = document.getElementById("user-twitter")
+
+
 
         user_following.innerText = `${response.following}`
         user_followers.innerText = `${response.followers}`
@@ -103,7 +113,7 @@ class UI {
 
         if (user_hireable.innerText === "true") {
             user_hireable.innerText = "Hireable"
-        }else{
+        } else {
             user_hireable.innerText = "Not Hireable"
         }
 
@@ -120,6 +130,106 @@ class UI {
             user_twitter.innerText = ""
         }
 
+
+
+    }
+
+    showRepos(response) {
+        this.recentRepos.innerHTML = ""
+        response.forEach(element => {
+            let div = document.createElement("div")
+            div.className = "pt-2 hover"
+            div.innerHTML = `
+                <div class="d-flex flex-column">
+                    <h5 class="text-success">${element.name}</h5>
+                    <p class="lh-1 text-muted mb-0">${element.description}</p>
+                </div>
+                <div class="d-flex justify-content-between justify-content-lg-start mt-2 flex-wrap">
+                    <div class="d-flex align-items-center me-lg-4">
+                        <span class="badge lang-color bg-danger p-0 me-1"> </span>
+                        <span class="text-muted">${element.language}</span>
+                    </div>
+                    <div class="d-flex align-items-center me-lg-4">
+                        <svg class="svg me-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z">
+                            </path>
+                        </svg>
+                        <span class="text-muted">${element.stargazers_count}</span>
+                    </div>
+                    <div class="d-flex align-items-center me-lg-4">
+                        <svg class="svg me-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z">
+                            </path>
+                        </svg>
+                        <span class="text-muted">${element.forks_count}</span>
+                    </div>
+                    <span class="text-muted">Updated ${element.updated_at}</span>
+                </div>
+                <p class="pb-3 mb-0 small lh-sm border-bottom">
+                </p>`
+            this.recentRepos.appendChild(div)
+        });
+
+    }
+
+    static searchLoader() {
+        document.getElementById("search-results").innerHTML = `
+        <div id="search-loader" class="d-flex justify-content-center mt-5 w-100">
+            <div class="spinner-border spinner-border text-warning" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-border spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>`
+    }
+
+    static repoLoader() {
+        document.getElementById("recent-repos").innerHTML = `
+            <div class="mt-3 ph-item">
+                <div class="ph-col-12">
+                    <div class="ph-row">
+                        <div class="ph-col-6 big"></div>
+                        <div class="ph-col-4 empty big"></div>
+                        <div class="ph-col-12"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                    </div>
+                    <p class="pb-3 mb-0 small lh-sm border-bottom"></p>
+                </div>
+                <div class="ph-col-12 mt-2">
+                    <div class="ph-row">
+                        <div class="ph-col-6 big"></div>
+                        <div class="ph-col-4 empty big"></div>
+                        <div class="ph-col-12"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                    </div>
+                    <p class="pb-3 mb-0 small lh-sm border-bottom"></p>
+                </div>
+                <div class="ph-col-12 mt-2">
+                    <div class="ph-row">
+                        <div class="ph-col-6 big"></div>
+                        <div class="ph-col-4 empty big"></div>
+                        <div class="ph-col-12"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                        <div class="ph-col-2"></div>
+                        <div class="ph-col-2 empty"></div>
+                    </div>
+                    <p class="pb-3 mb-0 small lh-sm border-bottom"></p>
+                </div>
+            </div>`
     }
 
     pagination(url, total_count) {
@@ -243,6 +353,7 @@ class UI {
             })
         }
         this.searchResults.previousElementSibling.innerText += `: ${response.total_count} ${response.transmitted.type}`
+        document.getElementById("search-loader").remove()
     }
 
     addRepositoriesResults(response) {
@@ -268,6 +379,7 @@ class UI {
             })
         }
         this.searchResults.previousElementSibling.innerText += `: ${response.total_count} ${response.transmitted.type}`
+        document.getElementById("search-loader").remove()
     }
 
     addIssuesResults(response) {
@@ -293,6 +405,7 @@ class UI {
             })
         }
         this.searchResults.previousElementSibling.innerText += `: ${response.total_count} ${response.transmitted.type}`
+        document.getElementById("search-loader").remove()
     }
 
     addEmptyResults() {

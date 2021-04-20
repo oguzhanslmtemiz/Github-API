@@ -127,3 +127,18 @@ body {
 .mw-500 {
   max-width: 30rem;
 }
+
+.lang-color{
+  width: 15px;
+  height: 15px;
+  border-radius: 15px;
+}
+
+#recent-repos{
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ph-avatar{
+  width: 92px;
+}
