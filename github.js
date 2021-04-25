@@ -26,7 +26,7 @@ class Github {
                     open_issues_count: element.open_issues_count,
                     owner: element.owner,
                     stargazers_count: element.stargazers_count,
-                    updated_at: element.updated_at,
+                    pushed_at: element.pushed_at,
                     watchers_count: element.watchers_count
                 },
                 issue: {
@@ -37,7 +37,6 @@ class Github {
                     repository_url: element.repository_url,
                     state: element.state,
                     title: element.title,
-                    updated_at: element.updated_at,
                     user: element.user
                 },
             })
@@ -61,12 +60,13 @@ class Github {
         }
     }
 
-    async getPageData(url, page) {
-        let response = await fetch(url + `&page=${page}`)
+    async getPageData(transmitted, page) {
+        let response = await fetch(transmitted.url + `&page=${page}`)
         let json = await response.json()
-        console.log("getPageData: ", url + `&page=${page}`)
+        console.log("getPageData: ", transmitted.url + `&page=${page}`)
         console.log("getPageData fetch: ", json)
         return {
+            transmitted: transmitted,
             total_count: json.total_count,
             items: this.filter(json.items)
         }
@@ -81,10 +81,9 @@ class Github {
     }
 
     async getUserRepo(url) {
-        let response = await fetch(url + "?sort=updated")
+        let response = await fetch(url + "?sort=pushed")
         let json = await response.json()
-        console.log("repo fetch: ",json);
+        console.log("repo fetch: ", json);
         return json
-
     }
 }

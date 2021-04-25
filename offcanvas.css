@@ -88,8 +88,8 @@ body {
 
 #search-input {
   background-clip: border-box;
+  box-shadow: 0 0 0 20px white inset !important;
 }
-
 
 @media (max-width: 991.98px) {
   #search-group {
@@ -98,12 +98,14 @@ body {
 }
 
 .hover {
+  color: currentColor;
   text-decoration: none;
-
+  overflow: hidden;
 }
 
 .hover:hover {
   cursor: pointer;
+  color: currentColor;
   background-color: #eee;
 }
 
@@ -142,3 +144,15 @@ body {
 .ph-avatar{
   width: 92px;
 }
+
+/* .bg-light {
+  background-color: #121212!important;
+}
+.bg-dark {
+  background-color: #121212!important;
+}
+.bg-body {
+  background-color: #212529!important;
+} */
+
+

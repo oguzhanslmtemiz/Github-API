@@ -27,19 +27,19 @@ function search() {
         github.getSearchData(searchSelect.innerText.trim().toLowerCase(), searchInput.value.trim())
             .then(response => {
                 ui.addUsersResults(response)
-                ui.pagination(response.transmitted.url, response.total_count)
+                ui.pagination(response.transmitted, response.total_count)
             })
     } else if (searchInput.value.trim() !== "" && searchSelect.innerText === "Repositories ") {
         github.getSearchData(searchSelect.innerText.trim().toLowerCase(), searchInput.value.trim())
             .then(response => {
                 ui.addRepositoriesResults(response)
-                ui.pagination(response.transmitted.url, response.total_count)
+                ui.pagination(response.transmitted, response.total_count)
             })
     } else if (searchInput.value.trim() !== "" && searchSelect.innerText === "Issues ") {
         github.getSearchData(searchSelect.innerText.trim().toLowerCase(), searchInput.value.trim())
             .then(response => {
                 ui.addIssuesResults(response)
-                ui.pagination(response.transmitted.url, response.total_count)
+                ui.pagination(response.transmitted, response.total_count)
             })
     } else {
         ui.addEmptyResults()
@@ -47,10 +47,10 @@ function search() {
     hamburgerMenu.classList.remove("open")
 }
 
-function changePage(url, page) {
+function changePage(transmitted, page) {
     UI.searchLoader()
     let ui = new UI()
-    github.getPageData(url, page)
+    github.getPageData(transmitted, page)
         .then(response => ui.changeResults(response)) //sadece users
 }
 
@@ -63,23 +63,15 @@ function showUser(username) {
     ui.ph_overview.setAttribute("style", "display:block !important")
     UI.repoLoader()
 
-    console.log("username: ", username);
     github.getUserData(username)
         .then(response => {
-            console.log("2. asama");
             ui.showUser(response)
             github.getUserRepo(response.repos_url)
                 .then(responseRepo => {
-                    console.log("3. asama");
                     ui.showRepos(responseRepo)
                 })
-            console.log("nebunebu", response)
         }).then(function () {
-                console.log("Stage 4");
-                ui.ph_overview.setAttribute("style", "display:none !important")
-                ui.overview.setAttribute("style", "display:flex !important")
-            }
-
-        )
-
+            ui.overview.setAttribute("style", "")
+            ui.ph_overview.setAttribute("style", "")
+        })
 }

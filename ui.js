@@ -90,7 +90,6 @@ class UI {
         let user_twitter = document.getElementById("user-twitter")
 
 
-
         user_following.innerText = `${response.following}`
         user_followers.innerText = `${response.followers}`
         user_repos.innerText = `${response.public_repos}`
@@ -129,25 +128,63 @@ class UI {
         if (user_twitter.innerText === "null") {
             user_twitter.innerText = ""
         }
-
-
-
     }
 
-    showRepos(response) {
-        this.recentRepos.innerHTML = ""
-        response.forEach(element => {
-            let div = document.createElement("div")
-            div.className = "pt-2 hover"
-            div.innerHTML = `
+    static relativeTime(timestamp) {
+        let elapsed = Date.now() - Date.parse(timestamp)
+        let sec = Math.floor(elapsed / 1000)
+        let min = Math.floor(sec / 60)
+        let hour = Math.floor(min / 60)
+        let day = Math.floor(hour / 24)
+        let month = Math.floor(day / 30)
+        let year = Math.floor(month / 12)
+
+        if (sec < 60) {
+            return (sec === 1) ? sec + " second ago" : sec + " seconds ago"
+        } else if (min < 60) {
+            return (min === 1) ? min + " minute ago" : min + " minutes ago"
+        } else if (hour < 24) {
+            return (hour === 1) ? hour + " hour ago" : hour + " hours ago"
+        } else if (day < 30) {
+            return (day === 1) ? day + " day ago" : day + " days ago"
+        } else if (month < 12) {
+            return (month === 1) ? month + " month ago" : month + " months ago"
+        } else {
+            return (year === 1) ? year + " year ago" : year + " years ago"
+        }
+    }
+
+    static setColor(language) {
+        if (githubLangColors[language] === undefined) {
+            return githubLangColors.null
+        } else {
+            return githubLangColors[language]
+        }
+    }
+
+    static hasNull(params) {
+        if (params !== null) {
+            return params
+        } else {
+            return ""
+        }
+    }
+
+    static createRepoElements(element, type) {
+        let a = document.createElement("a")
+        a.className = "d-block hover"
+        a.setAttribute("target", "_blank")
+        a.href = `${element.html_url}`
+        a.innerHTML = `
+            <div class="border-bottom py-2 h-100">
                 <div class="d-flex flex-column">
-                    <h5 class="text-success">${element.name}</h5>
-                    <p class="lh-1 text-muted mb-0">${element.description}</p>
+                    <h5 class="text-success">${(type === "repositories") ? element.full_name : element.name}</h5>
+                    <p class="lh-1 text-muted mb-0">${this.hasNull(element.description)}</p>
                 </div>
                 <div class="d-flex justify-content-between justify-content-lg-start mt-2 flex-wrap">
                     <div class="d-flex align-items-center me-lg-4">
-                        <span class="badge lang-color bg-danger p-0 me-1"> </span>
-                        <span class="text-muted">${element.language}</span>
+                        <span class="badge lang-color p-0 me-1" style="background-color: ${this.setColor(element.language)}"> </span>
+                        <span class="text-muted">${this.hasNull(element.language)}</span>
                     </div>
                     <div class="d-flex align-items-center me-lg-4">
                         <svg class="svg me-1" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
@@ -163,13 +200,18 @@ class UI {
                         </svg>
                         <span class="text-muted">${element.forks_count}</span>
                     </div>
-                    <span class="text-muted">Updated ${element.updated_at}</span>
+                    <span class="text-muted">Updated ${this.relativeTime(element.pushed_at)}</span>
                 </div>
-                <p class="pb-3 mb-0 small lh-sm border-bottom">
-                </p>`
-            this.recentRepos.appendChild(div)
-        });
+            </div>`
+        return a
+    }
 
+    showRepos(response) {
+        this.recentRepos.innerHTML = ""
+        response.forEach(element => {
+            let a = UI.createRepoElements(element)
+            this.recentRepos.appendChild(a)
+        });
     }
 
     static searchLoader() {
@@ -232,7 +274,7 @@ class UI {
             </div>`
     }
 
-    pagination(url, total_count) {
+    pagination(transmitted, total_count) {
         let totalPages = Math.ceil(total_count / 30)
         console.log("toplam sayfa: ", totalPages);
         let paginationItem = this.paginationItem
@@ -304,7 +346,7 @@ class UI {
             a.innerText = content
             a.addEventListener("click", function (e) {
                 let currentPage = changeState(e.target.parentElement)
-                changePage(url, currentPage)
+                changePage(transmitted, currentPage)
             })
 
             if (active === true) {
@@ -327,10 +369,11 @@ class UI {
             createPageItem(false, false, page)
         }
         createPageItem(false, false, "Next")
-
+        setDisable()
     }
 
     addUsersResults(response) {
+        this.searchResults.innerHTML = ""
         console.log("post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
@@ -344,7 +387,7 @@ class UI {
                                 src="${element.user.avatar_url}" alt="avatar" width="64">
                             <div class="small lh-sm w-100">
                                 <div class="d-flex justify-content-between">
-                                    <strong class="text-gray-dark">${element.user.login}</strong>
+                                    <strong>${element.user.login}</strong>
                                 </div>
                                 <span id="search-username" class="d-block">@${element.user.login}</span>
                             </div>
@@ -352,38 +395,53 @@ class UI {
                     </a>`
             })
         }
-        this.searchResults.previousElementSibling.innerText += `: ${response.total_count} ${response.transmitted.type}`
-        document.getElementById("search-loader").remove()
+        this.searchResults.previousElementSibling.innerText = `Search Results: ${response.total_count} ${response.transmitted.type}`
+        // document.getElementById("search-loader").remove()
     }
 
     addRepositoriesResults(response) {
+        this.searchResults.innerHTML = ""
         console.log("post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
         } else {
             response.items.forEach(element => {
-                this.searchResults.innerHTML += `
-                    <a class="col hover" href="${element.repository.html_url}" target="_blank">
-                        <div class="d-flex align-items-center text-muted border-bottom py-3">
-                            <span class="d-block">${element.repository.created_at}</span>
-                            <div class="small lh-sm w-100">
-                                <div class="d-flex justify-content-between">
-                                    <strong class="text-gray-dark">${element.repository.name}</strong>
-                                </div>
-                                <span id="search-username" class="d-block">${element.repository.description}</span>
-                                <span class="d-block">${element.repository.stargazers_count}</span>
-                            </div>
-                        </div>
-                    </a>`
+                let a = UI.createRepoElements(element.repository, response.transmitted.type)
+                this.searchResults.appendChild(a)
             })
         }
-        this.searchResults.previousElementSibling.innerText += `: ${response.total_count} ${response.transmitted.type}`
-        document.getElementById("search-loader").remove()
+        this.searchResults.previousElementSibling.innerText = `Search Results: ${response.total_count} ${response.transmitted.type}`
+        // document.getElementById("search-loader").remove()
     }
 
     addIssuesResults(response) {
-        console.log("post response: ", response)
+        this.searchResults.innerHTML = ""
+
+        function issueState(state) {
+            if (state === "open") {
+                return `<svg height="16" class="svg text-success flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9 3a1 1 0 11-2 0 1 1 0 012 0zm-.25-6.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5z">
+                            </path>
+                        </svg>`
+            } else {
+                return `<svg height="16" class="svg text-danger flex-shrink-0" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true">
+                            <path fill-rule="evenodd" 
+                                d="M1.5 8a6.5 6.5 0 0110.65-5.003.75.75 0 00.959-1.153 8 8 0 102.592 8.33.75.75 0 10-1.444-.407A6.5 6.5 0 011.5 8zM8 12a1 1 0 100-2 1 1 0 000 2zm0-8a.75.75 0 01.75.75v3.5a.75.75 0 11-1.5 0v-3.5A.75.75 0 018 4zm4.78 4.28l3-3a.75.75 0 00-1.06-1.06l-2.47 2.47-.97-.97a.749.749 0 10-1.06 1.06l1.5 1.5a.75.75 0 001.06 0z">
+                            </path>
+                        </svg>`
+            }
+        }
+
+        function titleColor(state, title) {
+            if (state === "open") {
+                return `<span class="text-success">${title}</span>`
+            } else {
+                return `<span class="text-danger">${title}</span>`
+            }
+        }
+        console.log("addIssuesResults() post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
@@ -391,46 +449,45 @@ class UI {
             response.items.forEach(element => {
                 this.searchResults.innerHTML += `
                     <a class="col hover" href="${element.issue.html_url}" target="_blank">
-                        <div class="d-flex align-items-center text-muted border-bottom py-3">
-                            <span class="d-block">${element.issue.created_at}</span>
-                            <div class="small lh-sm w-100">
-                                <div class="d-flex justify-content-between">
-                                    <strong class="text-gray-dark">${element.issue.state}</strong>
+                        <div class="d-flex text-muted border-bottom py-2 h-100">
+                            ${issueState(element.issue.state)}
+                            <div class="ms-1 d-flex flex-column">
+                                <div class="d-flex">
+                                    <strong class="small">${element.issue.repository_url.substring(element.issue.repository_url.indexOf("repos/") + 6)}</strong>
+                                    <span class="small ms-1">#${element.issue.number}</span>
                                 </div>
-                                <span id="search-username" class="d-block">${element.issue.title}</span>
-                                <span class="d-block">${element.issue.comments}</span>
+                                ${titleColor(element.issue.state, element.issue.title)}
+                                <div class="d-flex">
+                                    <strong class="small">${element.issue.user.login} </strong>
+                                    <span class="small ms-1">opened ${UI.relativeTime(element.issue.created_at)}</span>
+                                </div>
                             </div>
                         </div>
                     </a>`
             })
         }
-        this.searchResults.previousElementSibling.innerText += `: ${response.total_count} ${response.transmitted.type}`
-        document.getElementById("search-loader").remove()
+        this.searchResults.previousElementSibling.innerText = `Search Results: ${response.total_count} ${response.transmitted.type}`
+        // document.getElementById("search-loader").remove()
     }
 
     addEmptyResults() {
         this.searchResults.classList = ""
         this.searchResults.innerText = "Search Github API by typing a word in the search box."
-        this.searchResults.previousElementSibling.innerText += ": 0"
+        this.searchResults.previousElementSibling.innerText = "Search Results: 0"
     }
 
     changeResults(response) { // bura sadece user da sayfa degisince oluyor
+        console.log("type: ", response.transmitted);
         console.log("post response: ", response)
         this.searchResults.innerHTML = ""
-        response.items.forEach(element => {
-            this.searchResults.innerHTML += `
-                <a class="col hover" onclick="showUser('${element.user.login}')">
-                    <div class="d-flex align-items-center text-muted border-bottom py-3">
-                        <img class="bd-placeholder-img flex-shrink-0 me-2 rounded"
-                            src="${element.user.avatar_url}" alt="avatar" width="64">
-                        <div class="small lh-sm w-100">
-                            <div class="d-flex justify-content-between">
-                                <strong class="text-gray-dark">${element.user.login}</strong>
-                            </div>
-                            <span id="search-username" class="d-block">@${element.user.login}</span>
-                        </div>
-                    </div>
-                </a>`
-        })
+        if (response.transmitted.type === "users") {
+            this.addUsersResults(response)
+        } else if (response.transmitted.type === "repositories") {
+            this.addRepositoriesResults(response)
+        } else if (response.transmitted.type === "issues") {
+            this.addIssuesResults(response)
+        } else {
+            console.log("Beklenmedik bir hata olustu..");
+        }
     }
 }
