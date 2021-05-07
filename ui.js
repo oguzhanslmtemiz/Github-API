@@ -1,14 +1,17 @@
 class UI {
     constructor() {
         this.searchResultsDiv = document.getElementById("searchResultsDiv")
-        this.paginationElement = document.getElementById("pagination")
-        this.paginationItem = document.getElementById("pagination-item")
         this.searchResults = document.getElementById("search-results")
 
         this.overview = document.getElementById("overview")
         this.ph_overview = document.getElementById("ph-overview")
 
         this.recentRepos = document.getElementById("recent-repos")
+        this.userFollowing = document.getElementById("user-following")
+        this.userFollowers = document.getElementById("user-followers")
+        this.userReposResults = document.getElementById("user-repos-results")
+        this.userFollowingResults = document.getElementById("user-following-results")
+        this.userFollowersResults = document.getElementById("user-followers-results")
 
     }
 
@@ -33,6 +36,11 @@ class UI {
         }
     }
 
+    static clearResults(element) {
+        // console.log("CLEARCLEARCLEARCLEARCLEARCLEARCLEARCLEAR", element);
+        while (element.firstElementChild) element.removeChild(element.firstElementChild);
+    }
+
     static addSearchResultsElement() {
         let div = document.createElement("div")
         div.className = "my-3 p-3 bg-body rounded shadow-sm"
@@ -50,10 +58,9 @@ class UI {
 
         let nav = document.createElement("nav")
         nav.className = "mt-3"
-        nav.id = "pagination"
 
         let ul = document.createElement("ul")
-        ul.id = "pagination-item"
+        ul.id = "search-pagination"
         ul.className = "pagination pagination-sm justify-content-center justify-content-xl-end"
         nav.appendChild(ul)
 
@@ -66,67 +73,57 @@ class UI {
         navigation.setAttribute("style", "display:none")
     }
 
+    static clearPreviousResults() {
+        UI.clearResults(document.getElementById("searchResultsDiv"))
+
+        document.getElementById("user-following-count").innerText = ""
+        document.getElementById("user-followers-count").innerText = ""
+        document.getElementById("user-repos-count").innerText = ""
+
+        UI.clearResults(document.getElementById("user-following-results"))
+        UI.clearResults(document.getElementById("user-followers-results"))
+        UI.clearResults(document.getElementById("user-repos-results"))
+
+        UI.clearResults(document.getElementById("following-pagination"))
+        UI.clearResults(document.getElementById("followers-pagination"))
+        UI.clearResults(document.getElementById("repo-pagination"))
+    }
+
     static showResults() {
         window.scrollTo(0, 0)
-        document.getElementById("searchResultsDiv").innerHTML = ""
         userResultsDiv.setAttribute("style", "")
         navigation.setAttribute("style", "")
+        document.querySelector("#user-overview-tab").click()
+
+    }
+
+    static goTo(id) {
+        window.scrollTo(0, 0)
+        document.querySelector(`#${id}`).click()
     }
 
     showUser(response) {
+        document.getElementById("user-following-count").innerText = `${response.following}`
+        document.getElementById("user-followers-count").innerText = `${response.followers}`
+        document.getElementById("user-repos-count").innerText = `${response.public_repos}`
+        document.getElementById("user-avatar").src = `${response.avatar_url}`
+        document.getElementById("user-name").innerText = `${response.name}`
+        document.getElementById("user-login").innerText = `@${response.login}`
+        document.getElementById("user-html_url").href = `${response.html_url}`
+        document.getElementById("user-bio").innerText = `${UI.hasNull(response.bio)}`
+        document.getElementById("user-company").innerText = `${UI.hasNull(response.company)}`
+        document.getElementById("user-location").innerText = `${UI.hasNull(response.location)}`
+        document.getElementById("user-blog").innerText = `${UI.hasNull(response.blog)}`
+        document.getElementById("user-blog").href = `${UI.hasNull(response.blog)}`
+        document.getElementById("user-twitter").innerText = `${UI.hasNull(response.twitter_username)}`
 
-        let user_following = document.getElementById("user-following")
-        let user_followers = document.getElementById("user-followers")
-        let user_repos = document.getElementById("user-public_repos")
-        let user_avatar = document.getElementById("user-avatar")
-        let user_name = document.getElementById("user-name")
-        let user_login = document.getElementById("user-login")
-        let user_html = document.getElementById("user-html_url")
-        let user_bio = document.getElementById("user-bio")
         let user_hireable = document.getElementById("user-hireable")
-        let user_company = document.getElementById("user-company")
-        let user_location = document.getElementById("user-location")
-        let user_blog = document.getElementById("user-blog")
-        let user_twitter = document.getElementById("user-twitter")
-
-
-        user_following.innerText = `${response.following}`
-        user_followers.innerText = `${response.followers}`
-        user_repos.innerText = `${response.public_repos}`
-        user_avatar.src = `${response.avatar_url}`
-        user_name.innerText = `${response.name}`
-        user_login.innerText = `@${response.login}`
-        user_html.href = `${response.html_url}`
-        user_bio.innerText = `${response.bio}`
         user_hireable.innerText = `${response.hireable}`
-        user_company.innerText = `${response.company}`
-        user_location.innerText = `${response.location}`
-        user_blog.innerText = `${response.blog}`
-        user_blog.href = `${response.blog}`
-        user_twitter.innerText = `${response.twitter_username}`
-
-
-        if (user_bio.innerText === "null") {
-            user_bio.innerText = ""
-        }
 
         if (user_hireable.innerText === "true") {
             user_hireable.innerText = "Hireable"
         } else {
             user_hireable.innerText = "Not Hireable"
-        }
-
-        if (user_company.innerText === "null") {
-            user_company.innerText = ""
-        }
-        if (user_location.innerText === "null") {
-            user_location.innerText = ""
-        }
-        if (user_blog.innerText === "null") {
-            user_blog.innerText = ""
-        }
-        if (user_twitter.innerText === "null") {
-            user_twitter.innerText = ""
         }
     }
 
@@ -170,6 +167,24 @@ class UI {
         }
     }
 
+    static createUserElements(element) {
+        let a = document.createElement("a")
+        a.className = "col hover"
+        a.setAttribute("onclick", `showUser('${element.user.login}')`)
+        a.innerHTML = `
+            <div class="d-flex align-items-center text-muted border-bottom py-3">
+                <img class="bd-placeholder-img flex-shrink-0 me-2 rounded"
+                    src="${element.user.avatar_url}" alt="avatar" width="64">
+                <div class="small lh-sm w-100">
+                    <div class="d-flex justify-content-between">
+                        <strong>${element.user.login}</strong>
+                    </div>
+                    <span id="search-username" class="d-block">@${element.user.login}</span>
+                </div>
+            </div>`
+        return a
+    }
+
     static createRepoElements(element, type) {
         let a = document.createElement("a")
         a.className = "d-block hover"
@@ -206,16 +221,22 @@ class UI {
         return a
     }
 
-    showRepos(response) {
-        this.recentRepos.innerHTML = ""
+    showRepos(response, url, repos_count) {
+        UI.clearResults(this.recentRepos)
         response.forEach(element => {
             let a = UI.createRepoElements(element)
             this.recentRepos.appendChild(a)
         });
+        response.forEach(element => {
+            let a = UI.createRepoElements(element)
+            this.userReposResults.appendChild(a)
+        });
+        let elementId = document.getElementById("repo-pagination")
+        this.pagination(url, repos_count, elementId)
     }
 
-    static searchLoader() {
-        document.getElementById("search-results").innerHTML = `
+    static searchLoader(id) {
+        return document.getElementById(`${id}`).innerHTML = `
         <div id="search-loader" class="d-flex justify-content-center mt-5 w-100">
             <div class="spinner-border spinner-border text-warning" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -274,10 +295,12 @@ class UI {
             </div>`
     }
 
-    pagination(transmitted, total_count) {
+    pagination(url, total_count, elementId) {
         let totalPages = Math.ceil(total_count / 30)
-        console.log("toplam sayfa: ", totalPages);
-        let paginationItem = this.paginationItem
+        console.log(elementId.id, " total page: ", totalPages, "(max. 7 page)");
+        let paginationItem = elementId
+        // elementId = document.getElementById("search-pagination")
+
 
         function findActive() {
             for (let index = 0; index < paginationItem.childNodes.length; index++) {
@@ -323,10 +346,10 @@ class UI {
                 newActive.previousSibling.classList.add("disabled")
             }
             if (newActive.previousSibling.innerText !== "Previous") {
-                paginationItem.firstChild.classList.remove("disabled")
+                paginationItem.firstElementChild.classList.remove("disabled")
             }
             if (newActive.nextSibling.innerText !== "Next") {
-                paginationItem.lastChild.classList.remove("disabled")
+                paginationItem.lastElementChild.classList.remove("disabled")
             }
         }
 
@@ -346,7 +369,7 @@ class UI {
             a.innerText = content
             a.addEventListener("click", function (e) {
                 let currentPage = changeState(e.target.parentElement)
-                changePage(transmitted, currentPage)
+                changePage(url, currentPage)
             })
 
             if (active === true) {
@@ -373,35 +396,23 @@ class UI {
     }
 
     addUsersResults(response) {
-        this.searchResults.innerHTML = ""
-        console.log("post response: ", response)
+        UI.clearResults(this.searchResults)
+        console.log("addUsersResults() post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
         } else {
             response.items.forEach(element => {
-                this.searchResults.innerHTML += `
-                    <a class="col hover" onclick="showUser('${element.user.login}')"> 
-                        <div class="d-flex align-items-center text-muted border-bottom py-3">
-                            <img class="bd-placeholder-img flex-shrink-0 me-2 rounded"
-                                src="${element.user.avatar_url}" alt="avatar" width="64">
-                            <div class="small lh-sm w-100">
-                                <div class="d-flex justify-content-between">
-                                    <strong>${element.user.login}</strong>
-                                </div>
-                                <span id="search-username" class="d-block">@${element.user.login}</span>
-                            </div>
-                        </div>
-                    </a>`
+                let a = UI.createUserElements(element)
+                this.searchResults.appendChild(a)
             })
         }
         this.searchResults.previousElementSibling.innerText = `Search Results: ${response.total_count} ${response.transmitted.type}`
-        // document.getElementById("search-loader").remove()
     }
 
     addRepositoriesResults(response) {
-        this.searchResults.innerHTML = ""
-        console.log("post response: ", response)
+        UI.clearResults(this.searchResults)
+        console.log("addRepositoriesResults() post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
@@ -412,11 +423,11 @@ class UI {
             })
         }
         this.searchResults.previousElementSibling.innerText = `Search Results: ${response.total_count} ${response.transmitted.type}`
-        // document.getElementById("search-loader").remove()
     }
 
     addIssuesResults(response) {
-        this.searchResults.innerHTML = ""
+        UI.clearResults(this.searchResults)
+        console.log("addIssuesResults() post response: ", response)
 
         function issueState(state) {
             if (state === "open") {
@@ -441,7 +452,6 @@ class UI {
                 return `<span class="text-danger">${title}</span>`
             }
         }
-        console.log("addIssuesResults() post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
@@ -467,7 +477,6 @@ class UI {
             })
         }
         this.searchResults.previousElementSibling.innerText = `Search Results: ${response.total_count} ${response.transmitted.type}`
-        // document.getElementById("search-loader").remove()
     }
 
     addEmptyResults() {
@@ -476,10 +485,10 @@ class UI {
         this.searchResults.previousElementSibling.innerText = "Search Results: 0"
     }
 
-    changeResults(response) { // bura sadece user da sayfa degisince oluyor
+    changeSearchResults(response) {
         console.log("type: ", response.transmitted);
-        console.log("post response: ", response)
-        this.searchResults.innerHTML = ""
+        console.log("changeSearchResults() post response: ", response)
+        // UI.clearResults(this.searchResults)
         if (response.transmitted.type === "users") {
             this.addUsersResults(response)
         } else if (response.transmitted.type === "repositories") {
@@ -488,6 +497,34 @@ class UI {
             this.addIssuesResults(response)
         } else {
             console.log("Beklenmedik bir hata olustu..");
+        }
+    }
+
+    changeTabResults(response, type) {
+        console.log("addFollowResults() post response: ", response)
+
+        if (type === "following") {
+            UI.clearResults(this.userFollowingResults)
+            response.forEach(element => {
+                let a = UI.createUserElements(element)
+                this.userFollowingResults.appendChild(a)
+            })
+
+        } else if (type === "followers") {
+            UI.clearResults(this.userFollowersResults)
+            response.forEach(element => {
+                let a = UI.createUserElements(element)
+                this.userFollowersResults.appendChild(a)
+            })
+
+        } else if (type === "repos") {
+            UI.clearResults(this.userReposResults)
+            response.forEach(element => {
+                let a = UI.createRepoElements(element)
+                this.userReposResults.appendChild(a)
+            });
+        } else {
+            console.log("NO WAY");
         }
     }
 }

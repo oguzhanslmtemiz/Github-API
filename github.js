@@ -63,7 +63,7 @@ class Github {
     async getPageData(transmitted, page) {
         let response = await fetch(transmitted.url + `&page=${page}`)
         let json = await response.json()
-        console.log("getPageData: ", transmitted.url + `&page=${page}`)
+        console.log("getPageData() ", transmitted.url + `&page=${page}`)
         console.log("getPageData fetch: ", json)
         return {
             transmitted: transmitted,
@@ -75,15 +75,24 @@ class Github {
     async getUserData(username) {
         let response = await fetch(this.userUrl + username)
         let json = await response.json()
-        console.log("getUserData: ", this.userUrl + username)
+        console.log("getUserData() ", this.userUrl + username)
         console.log("fetch: ", json)
         return json
     }
 
-    async getUserRepo(url) {
-        let response = await fetch(url + "?sort=pushed")
+    async getUserRepo(url, page) {
+        let response = await fetch(url + "?sort=pushed" + `&page=${page}`)
         let json = await response.json()
+        console.log("getUserRepo() ", url + "?sort=pushed" + `&page=${page}`);
         console.log("repo fetch: ", json);
         return json
+    }
+ // belki ilerde getUserRepo ile getFollowData birlesir
+    async getFollowData(url, page) {
+        let response = await fetch(url + `?page=${page}`)
+        let json = await response.json()
+        console.log("getFollowData() ", url + `?page=${page}`)
+        console.log("fetch: ", json)
+        return this.filter(json)
     }
 }
