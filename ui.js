@@ -108,6 +108,7 @@ class UI {
         document.getElementById("user-blog").innerText = `${UI.hasNull(response.blog)}`
         document.getElementById("user-blog").href = `${UI.hasNull(response.blog)}`
         document.getElementById("user-twitter").innerText = `${UI.hasNull(response.twitter_username)}`
+        document.getElementById("user-twitter").href = `https://twitter.com/${UI.hasNull(response.twitter_username)}`
         let user_hireable = document.getElementById("user-hireable")
         user_hireable.innerText = `${response.hireable}`
         if (user_hireable.innerText === "true") {
