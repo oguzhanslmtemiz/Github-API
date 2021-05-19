@@ -2,17 +2,14 @@ class UI {
     constructor() {
         this.searchResultsDiv = document.getElementById("searchResultsDiv")
         this.searchResults = document.getElementById("search-results")
-
         this.overview = document.getElementById("overview")
         this.ph_overview = document.getElementById("ph-overview")
-
         this.recentRepos = document.getElementById("recent-repos")
         this.userFollowing = document.getElementById("user-following")
         this.userFollowers = document.getElementById("user-followers")
         this.userReposResults = document.getElementById("user-repos-results")
         this.userFollowingResults = document.getElementById("user-following-results")
         this.userFollowersResults = document.getElementById("user-followers-results")
-
     }
 
     static addBoxShadow() {
@@ -37,7 +34,6 @@ class UI {
     }
 
     static clearResults(element) {
-        // console.log("CLEARCLEARCLEARCLEARCLEARCLEARCLEARCLEAR", element);
         while (element.firstElementChild) element.removeChild(element.firstElementChild);
     }
 
@@ -75,15 +71,12 @@ class UI {
 
     static clearPreviousResults() {
         UI.clearResults(document.getElementById("searchResultsDiv"))
-
         document.getElementById("user-following-count").innerText = ""
         document.getElementById("user-followers-count").innerText = ""
         document.getElementById("user-repos-count").innerText = ""
-
         UI.clearResults(document.getElementById("user-following-results"))
         UI.clearResults(document.getElementById("user-followers-results"))
         UI.clearResults(document.getElementById("user-repos-results"))
-
         UI.clearResults(document.getElementById("following-pagination"))
         UI.clearResults(document.getElementById("followers-pagination"))
         UI.clearResults(document.getElementById("repo-pagination"))
@@ -94,7 +87,6 @@ class UI {
         userResultsDiv.setAttribute("style", "")
         navigation.setAttribute("style", "")
         document.querySelector("#user-overview-tab").click()
-
     }
 
     static goTo(id) {
@@ -116,10 +108,8 @@ class UI {
         document.getElementById("user-blog").innerText = `${UI.hasNull(response.blog)}`
         document.getElementById("user-blog").href = `${UI.hasNull(response.blog)}`
         document.getElementById("user-twitter").innerText = `${UI.hasNull(response.twitter_username)}`
-
         let user_hireable = document.getElementById("user-hireable")
         user_hireable.innerText = `${response.hireable}`
-
         if (user_hireable.innerText === "true") {
             user_hireable.innerText = "Hireable"
         } else {
@@ -173,8 +163,8 @@ class UI {
         a.setAttribute("onclick", `showUser('${element.user.login}')`)
         a.innerHTML = `
             <div class="d-flex align-items-center text-muted border-bottom py-3">
-                <img class="bd-placeholder-img flex-shrink-0 me-2 rounded"
-                    src="${element.user.avatar_url}" alt="avatar" width="64">
+                <img class="img-thumbnail flex-shrink-0 me-2 p-0 border-0 rounded"
+                    src="${element.user.avatar_url}" alt="avatar" width="64" height="64">
                 <div class="small lh-sm w-100">
                     <div class="d-flex justify-content-between">
                         <strong>${element.user.login}</strong>
@@ -299,8 +289,6 @@ class UI {
         let totalPages = Math.ceil(total_count / 30)
         console.log(elementId.id, " total page: ", totalPages, "(max. 7 page)");
         let paginationItem = elementId
-        // elementId = document.getElementById("search-pagination")
-
 
         function findActive() {
             for (let index = 0; index < paginationItem.childNodes.length; index++) {
@@ -354,7 +342,6 @@ class UI {
         }
 
         function changeState(target) {
-
             let currentPage = setActive(target)
             setDisable()
             return currentPage
@@ -397,7 +384,6 @@ class UI {
 
     addUsersResults(response) {
         UI.clearResults(this.searchResults)
-        console.log("addUsersResults() post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
@@ -412,7 +398,6 @@ class UI {
 
     addRepositoriesResults(response) {
         UI.clearResults(this.searchResults)
-        console.log("addRepositoriesResults() post response: ", response)
         if (response.total_count === 0) {
             this.searchResults.classList = ""
             this.searchResults.innerText = `We couldn’t find any ${response.transmitted.type} matching "${response.transmitted.input}"`
@@ -427,7 +412,6 @@ class UI {
 
     addIssuesResults(response) {
         UI.clearResults(this.searchResults)
-        console.log("addIssuesResults() post response: ", response)
 
         function issueState(state) {
             if (state === "open") {
@@ -486,9 +470,6 @@ class UI {
     }
 
     changeSearchResults(response) {
-        console.log("type: ", response.transmitted);
-        console.log("changeSearchResults() post response: ", response)
-        // UI.clearResults(this.searchResults)
         if (response.transmitted.type === "users") {
             this.addUsersResults(response)
         } else if (response.transmitted.type === "repositories") {
@@ -496,13 +477,11 @@ class UI {
         } else if (response.transmitted.type === "issues") {
             this.addIssuesResults(response)
         } else {
-            console.log("Beklenmedik bir hata olustu..");
+            console.log("An unexpected error has occurred..");
         }
     }
 
     changeTabResults(response, type) {
-        console.log("addFollowResults() post response: ", response)
-
         if (type === "following") {
             UI.clearResults(this.userFollowingResults)
             response.forEach(element => {
@@ -524,7 +503,149 @@ class UI {
                 this.userReposResults.appendChild(a)
             });
         } else {
-            console.log("NO WAY");
+            console.log("Unexpected Type");
         }
+    }
+
+    static addRecentSearches(obj) {
+        let searched
+        if (obj.type === "DOMContentLoaded") {
+            searched = JSON.parse(localStorage.getItem("searched") || '[]')
+        } else {
+            searched = [obj]
+        }
+
+        function removeDuplicate(element) {
+            const divs = document.querySelectorAll("#recent-searches > div")
+            let span = `${element.type} / ${element.input}`
+            for (let i = 0; i < divs.length; i++) {
+                const div = divs[i].innerText.toLowerCase().trim()
+                if (element.type === "user" && `@${element.input}` === div) {
+                    divs[i].remove()
+                }
+                if (span === div) {
+                    divs[i].remove()
+                }
+            }
+        }
+
+        searched.forEach(element => {
+            let color = "text-warning"
+            let span = `<span class="text-capitalize text-truncate">${element.type} / ${element.input}</span>`
+            let div = document.createElement("div")
+            div.setAttribute("onclick", `search(event,'${element.type}','${element.input}')`)
+            if (element.type === "users") {
+                color = "text-danger"
+            } else if (element.type === "repositories") {
+                color = "text-success"
+            } else if (element.type === "issues") {
+                color = "text-primary"
+            } else if (element.type === "user") {
+                div.setAttribute("onclick", `showUser('${element.input}')`)
+                span = `<span class="text-truncate">@${element.input}</span>`
+            }
+            removeDuplicate(element)
+            div.className += " d-flex text-muted py-2 align-items-center hover"
+            div.innerHTML = `
+                <svg class="svg flex-shrink-0 me-2 rounded ${color}" width="32" height="32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 32x32" preserveAspectRatio="xMidYMid slice" focusable="false">
+                    <rect width="100%" height="100%"></rect>
+                </svg>
+                ${span}`
+            document.getElementById("recent-searches").prepend(div)
+        })
+    }
+
+    static recentSearches(type, input) {
+        UI.removeDuplicatesFromLS(type, input)
+        let searchedStr = localStorage.getItem("searched") || '[]'
+        let searched = JSON.parse(searchedStr)
+        let obj = {
+            type,
+            input
+        }
+        if (searchedStr.includes(JSON.stringify(obj)) === false) {
+            searched.push(obj);
+        }
+        localStorage.setItem("searched", JSON.stringify(searched))
+        UI.addRecentSearches(obj)
+    }
+
+    static clearRecentSearches() {
+        localStorage.removeItem("searched")
+        UI.clearResults(document.getElementById("recent-searches"))
+    }
+
+    static removeDuplicatesFromLS(type, input) {
+        let searchedStr = localStorage.getItem("searched") || '[]'
+        let searched = JSON.parse(searchedStr)
+        let obj = {
+            type,
+            input
+        }
+        searched.forEach((element, index) => {
+            if (JSON.stringify(obj) === JSON.stringify(element)) {
+                searched.splice(index, 1)
+                localStorage.setItem("searched", JSON.stringify(searched))
+            }
+        })
+    }
+
+    static showRateLimit(response) {
+        function setTime(timestamp) {
+            let time = Math.abs(Number(UI.relativeTime(new Date(timestamp * 1000)).split(" ")[0]))
+            let minutes = Math.floor(time / 60)
+            let seconds = time - minutes * 60
+            return `${minutes}min ${seconds}s`
+        }
+        document.getElementById("rateLimitContent").innerHTML = `
+            <table class="table table-hover text-secondary">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Core</th>
+                        <th scope="col">Search</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">Limit</th>
+                        <td>${response.resources.core.limit}</td>
+                        <td>${response.resources.search.limit}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Remaining</th>
+                        <td>${response.resources.core.remaining}</td>
+                        <td>${response.resources.search.remaining}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Used</th>
+                        <td>${response.resources.core.used}</td>
+                        <td>${response.resources.search.used}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Reset</th>
+                        <td>${setTime(response.resources.core.reset)}</td>
+                        <td>${setTime(response.resources.search.reset)}</td>
+                    </tr>
+                </tbody>
+            </table>`
+    }
+
+    static darkMode() {
+        const currentTheme = localStorage.getItem("theme");
+        if (currentTheme == "dark") {
+            document.body.classList.add("dark-mode");
+            document.getElementById("dark-mode").innerText = "Light Mode"
+        }
+        document.getElementById("dark-mode").addEventListener("click", function () {
+            document.body.classList.toggle("dark-mode")
+            document.getElementById("dark-mode").innerText = "Dark Mode"
+            let theme = "light";
+            if (document.body.classList.contains("dark-mode")) {
+                document.getElementById("dark-mode").innerText = "Light Mode"
+                theme = "dark";
+            }
+            localStorage.setItem("theme", theme);
+        })
     }
 }

@@ -1,7 +1,6 @@
 html,
 body {
   overflow-x: hidden;
-  /* Prevent scroll on narrow devices */
 }
 
 body {
@@ -12,7 +11,6 @@ body {
   .offcanvas-collapse {
     position: fixed;
     top: 56px;
-    /* Height of navbar */
     bottom: 0;
     left: 100%;
     width: 100%;
@@ -174,8 +172,13 @@ body {
   background-color: #198754 !important;
 }
 
+.img-thumbnail {
+  background-color: #197c4f;
+}
+
 .dark-mode {
   background-color: #121212 !important;
+  color: #198754 !important;
 }
 
 .dark-mode .bg-dark {
@@ -210,6 +213,17 @@ body {
 
 .dark-mode .hover:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .modal-header {
+  border-bottom-color: #198754 !important;
+}
+.dark-mode .modal-footer {
+  border-top-color: #198754 !important;
+}
+
+.dark-mode .table-hover>tbody>tr:hover {
+  color: white;
 }
 
 ::-webkit-scrollbar {

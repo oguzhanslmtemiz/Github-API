@@ -48,7 +48,6 @@ class Github {
         let response = await fetch(this.searchUrl + `${type}?q=${input}`)
         let json = await response.json()
         console.log(this.searchUrl + `${type}?q=${input}`)
-        console.log("fetch: ", json)
         return {
             transmitted: {
                 url: this.searchUrl + `${type}?q=${input}`,
@@ -64,7 +63,6 @@ class Github {
         let response = await fetch(transmitted.url + `&page=${page}`)
         let json = await response.json()
         console.log("getPageData() ", transmitted.url + `&page=${page}`)
-        console.log("getPageData fetch: ", json)
         return {
             transmitted: transmitted,
             total_count: json.total_count,
@@ -76,7 +74,6 @@ class Github {
         let response = await fetch(this.userUrl + username)
         let json = await response.json()
         console.log("getUserData() ", this.userUrl + username)
-        console.log("fetch: ", json)
         return json
     }
 
@@ -84,15 +81,20 @@ class Github {
         let response = await fetch(url + "?sort=pushed" + `&page=${page}`)
         let json = await response.json()
         console.log("getUserRepo() ", url + "?sort=pushed" + `&page=${page}`);
-        console.log("repo fetch: ", json);
         return json
     }
- // belki ilerde getUserRepo ile getFollowData birlesir
+    
     async getFollowData(url, page) {
         let response = await fetch(url + `?page=${page}`)
         let json = await response.json()
         console.log("getFollowData() ", url + `?page=${page}`)
-        console.log("fetch: ", json)
         return this.filter(json)
+    }
+
+    async getRateLimit() {
+        let response = await fetch(`https://api.github.com/rate_limit`)
+        let json = await response.json()
+        console.log("getRateLimit()")
+        return json
     }
 }
